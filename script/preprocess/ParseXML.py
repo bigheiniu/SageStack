@@ -3,27 +3,33 @@ import numpy as np
 import xml.etree.cElementTree as et
 import pickle
 from script.Config import config
+import os
 
 
 def getValueofNode(node):
     return node.text if node is not None else None
 
 
-def XML2DF(fileName, columnNames):
+def XML2DF(fileName, columnNames,flag="Vote"):
     parsed_xml = et.parse(fileName)
-    df_xml = pd.DataFrame(columns=columnNames)
 
+    store = {col:[] for col in columnNames}
     for node in parsed_xml.getroot():
-        df_xml = df_xml.append(pd.Series([node.attrib.get(col) for col in columnNames], index=columnNames),
-                               ignore_index=True)
-
+        for col in columnNames:
+            store.get(col).append(node.attrib.get(col))
+    df_xml = pd.DataFrame(store)
+    if flag == "Post":
+        content = []
+        for node in parsed_xml.getroot():
+            content.append(node.attrib.get("Body"))
+        return df_xml, content
     return df_xml
 
 def getPostData(fileName):
     # fileName = "/Users/bigheiniu/course/ASU_course/472_social/classproject/stackoverflow/data/Posts.xml"
-    columns = ['Id','PostTypeId','Body','ParentId','AcceptedAnswerId','OwnerUserId']
-    data = XML2DF(fileName,columns)
-    return data
+    columns = ['Id','PostTypeId','ParentId','AcceptedAnswerId','OwnerUserId']
+    data,content = XML2DF(fileName,columns,"Post")
+    return data,content
 
 
 def getVotesRelationship(fileName):
@@ -33,8 +39,9 @@ def getVotesRelationship(fileName):
 
 def saveData(InputFileName, OutputFileName, flag):
     if(flag == 0):
-        return
-        data = getPostData(InputFileName)
+        data, content = getPostData(InputFileName)
+        with open(config.resource_base_dir + "content_list.pickle", "wb") as f1:
+            pickle.dump(content, f1)
     else:
         data = getVotesRelationship(InputFileName)
     with open(OutputFileName, 'wb') as f1:

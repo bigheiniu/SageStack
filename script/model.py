@@ -242,27 +242,31 @@ class UnSupervisedGraphSage(nn.Module):
             loss_value = loss_value.type(torch.cuda.FloatTensor)
         else:
             loss_value = loss_value.type(torch.FloatTensor)
+        test = []
         for i in range(self.batch_size):
             neg_user_id = torch.multinomial(torch.pow(numpy2tensor_float(self.deg_user), 0.75), self.config.neg_sample_size)
+            #neg_user_id = torch.add(neg_user_id, self.content_size)
             neg_question = torch.multinomial(torch.pow(numpy2tensor_float(self.deg_question), 0.75), self.config.neg_sample_size)
             neg_question = tensor2numpy_int(neg_question)
             neg_question = np.array([self.idx2id.get(q) for q in neg_question])
+            #neg_question = numpy2tensor_long(neg_question)
 
-            # neg_user_id = tensor2numpy_int(neg_user_id)
-            # neg_user_id = numpy2tensor_long(np.array([self.idx2id.get(u + self.content_size) for u in neg_user_id]))
-            neg_user_id = neg_user_id
-
-            # neg_question_vec, neg_user_vec = self.forward(neg_question, neg_user_id)
+            #neg_question_vec, neg_user_vec = self.forward(neg_question, neg_user_id)
             neg_question_vec = self._lstm_embedd(neg_question)
             neg_user_vec = self.user_embed(neg_user_id)
-            neg_score = torch.sum(self.neg_score(question_node_vec[i], neg_user_vec)) + torch.sum(self.neg_score(user_node_vec[i], neg_question_vec))
-            loss_value[i] = -1.0 * neg_score
+            neg_score = self.neg_score(question_node_vec[i], neg_user_vec) + self.neg_score(user_node_vec[i], neg_question_vec)
+            #loss_value[i] = -1.0 * neg_score
+            #neg_score = torch.sum(torch.matmul(question_node_vec[i], neg_user_vec.t())
 
-        pos_los = self.score(question_node_vec[i], user_node_vec[i], answer_edge_vec[i])
-        loss_value[self.batch_size] = pos_los
+            test.append(neg_score)
+            test.append(self.score(question_node_vec[i], user_node_vec[i], answer_edge_vec[i])
+)
+        #pos_los = self.score(question_node_vec[i], user_node_vec[i], answer_edge_vec[i])
+        #loss_value[self.batch_size] = pos_los
         #TODO:为了简化, 就假设 negative 选中边的人没有回答问题
-        loss_value = torch.sum(loss_value)
-        tim3 = time.time()
+        #loss_value = torch.sum(loss_value)
+        test = [tensor.unsqueeze(0) for tensor in test]
+        loss_value = torch.sum(torch.cat(test))
         # print("negative samp {}".format(tim3 - tim2))
         return loss_value
 

@@ -101,15 +101,17 @@ def loadData(file_dir_list):
     with open(vote_dir, 'rb') as f1:
         vote = pickle.load(f1)
     # vote.drop(['UserId'], inplace=True, axis=1)
-    vote = vote[vote['VoteTypeId'] == '2']
-    vote = vote[vote['VoteTypeId'] == '2'].groupby('PostId').count()
+    vote = vote[vote['VoteTypeId'] == '2'].groupby('PostId').size().reset_index(name='counts')
 
     # questionId - userId - answerId
-    content = text_to_wordlist(list(post['Body'].values))
+    with open(config.content_file,'rb') as f1:
+        content = pickle.load(f1)
+
+    content = text_to_wordlist(content)
 
     # dense
     content_len = len(content)
-    content_id2idx = { value:index for index, value in enumerate(post['Id'].values)}
+    content_id2idx = {value:index for index, value in enumerate(post['Id'].values)}
 
     question = post[post['PostTypeId'] == '1'][['Id']]
     question_len = len(question)
@@ -126,6 +128,8 @@ def loadData(file_dir_list):
     question_answer.columns = ['Id_x', 'Id_y', 'OwnerUserId']
     quesiton_answer_vote = pd.merge(question_answer, vote, how='left', left_on='Id_y', right_on='PostId')
     quesiton_answer_vote.fillna(0., inplace=True)
+    quesiton_answer_vote.drop(['PostId'],inplace=True, axis=1)
+    print(quesiton_answer_vote.head())
     quesiton_answer_vote.columns = ['q_id', 'a_id', 'u_id', 'score']
 
     # dense userId
@@ -167,3 +171,19 @@ def loadData(file_dir_list):
             attr[edge] = False
     nx.set_edge_attributes(G, attr, 'train_removed')
     return G, content_len, user_len, content
+
+def saveLoadData(**kwargs):
+    value = list(kwargs.values())
+    for i,file in enumerate(config.target_dir_list):
+        with open(file,'wb') as f1:
+            pickle.dump(value[i], f1)
+def loadSaveData():
+    th = []
+    for file in config.target_dir_list:
+        with open(file,'rb') as f1:
+            data = pickle.load(f1)
+        th.append(data)
+    with open(config.content_file,'rb') as f1:
+        data = pickle.load(f1)
+    th.append(data)
+    return tuple(th)

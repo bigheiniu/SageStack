@@ -15,7 +15,7 @@ from collections import defaultdict
 from script.minibatch import Minibatch
 from script.neigh_samplers import UniformNeighborSampler
 from script.model import SAGEInfo, UnSupervisedGraphSage
-from script.Util import loadData, load_embedding,load_config
+from script.Util import loadData, load_embedding,load_config,saveLoadData,loadSaveData
 from script.Config import config
 """
 Simple supervised GraphSAGE model as well as examples running the model
@@ -90,10 +90,13 @@ def train(G, content_embedd, word_embed, len_embed, content_size, user_size, con
 
 if __name__ == '__main__':
     config = load_config()
-    file_dir_list = config.file_dir_list
-    G, content_len, user_len,content= loadData(file_dir_list)
+    if(config.store):
+        file_dir_list = config.file_dir_list
+        G, content_len, user_len,content= loadData(file_dir_list)
+        saveLoadData(G=G,c=content_len,u=user_len)
+    else:
+        G, content_len, user_len, content = loadSaveData()
     content_embedd, len_embed, word_embed= load_embedding(content)
-
     train(G,content_embedd, word_embed,len_embed, content_len, user_len, config)
 
 

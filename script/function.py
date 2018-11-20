@@ -34,5 +34,5 @@ class NegScore(nn.Module):
 
     def forward(self, node, neg_node):
         # tile node
-        th = torch.matmul(neg_node, node)
+        th = torch.sum(torch.matmul(node,neg_node.t().contiguous()))
         return th

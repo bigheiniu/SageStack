@@ -21,6 +21,8 @@ from script.Config import config
 Simple supervised GraphSAGE model as well as examples running the model
 on the Cora and Pubmed datasets.
 """
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 def train(G, content_embedd, word_embed, len_embed, content_size, user_size, config):
     minibatch = Minibatch(G, config.batch_size, config.max_degree, content_size)
@@ -51,12 +53,8 @@ def train(G, content_embedd, word_embed, len_embed, content_size, user_size, con
         question_node, user_node, answe_edge, _ = minibatch.next_mini_batch()
         loss = model.loss(question_node, user_node, answe_edge)
         optimizer.zero_grad()
-
-        tim1 = time.time()
         loss.backward()
-        tim2 = time.time()
         optimizer.step()
-        tim3 = time.time()
         # print("backward time {}".format(tim2 - tim1))
         # print("step time {}".format(tim3 - tim2))
         # if config.debug:
@@ -71,8 +69,8 @@ def train(G, content_embedd, word_embed, len_embed, content_size, user_size, con
         if (i + 1) % 100 == 0:
             with torch.no_grad():
                 result = model.evaluate()
-            # print("finish {}".format(i))
-            # print("score {}".format(result))
+            print("finish {}".format(i))
+            print("score {}".format(result))
 
         i = i + 1
     

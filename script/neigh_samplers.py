@@ -35,11 +35,12 @@ class UniformNeighborSampler(torch.nn.Module):
         ids, num_samples = inputs
         # convert ids to idx => get the column of adjancy matrix
         ids = tensor2numpy_int(ids)
+        th = ids
         ids = np.array([self.id2idx.get(id) for id in ids])
         try:
             ids = numpy2tensor_long(ids)
         except:
-            print(ids)
+            print(th)
         adj_lists = self.adj_info(ids)
         adj_answerId_lists = self.adj_answer(ids)
         index = torch.randperm(self.y_)
