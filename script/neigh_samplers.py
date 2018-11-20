@@ -38,6 +38,7 @@ class UniformNeighborSampler(torch.nn.Module):
         th = ids
         ids = np.array([self.id2idx.get(id) for id in ids])
         try:
+            th = ids
             ids = numpy2tensor_long(ids)
         except:
             print(th)
