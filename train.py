@@ -52,11 +52,8 @@ def train(G, content_embedd, word_embed, len_embed, content_size, user_size, con
         loss = model.loss(question_node, user_node, answe_edge)
         optimizer.zero_grad()
 
-        tim1 = time.time()
         loss.backward()
-        tim2 = time.time()
         optimizer.step()
-        tim3 = time.time()
         # print("backward time {}".format(tim2 - tim1))
         # print("step time {}".format(tim3 - tim2))
         # if config.debug:
@@ -71,8 +68,8 @@ def train(G, content_embedd, word_embed, len_embed, content_size, user_size, con
         if (i + 1) % 100 == 0:
             with torch.no_grad():
                 result = model.evaluate()
-            # print("finish {}".format(i))
-            # print("score {}".format(result))
+            print("finish {}".format(i))
+            print("score {}".format(result))
 
         i = i + 1
     
@@ -86,7 +83,7 @@ def train(G, content_embedd, word_embed, len_embed, content_size, user_size, con
 if __name__ == '__main__':
     config = load_config()
     file_dir_list = config.file_dir_list
-    G, content_len, user_len,content= loadData(file_dir_list)
+    G, content_len, user_len,content,_ = loadData(file_dir_list)
     content_embedd, len_embed, word_embed= load_embedding(content)
 
     train(G,content_embedd, word_embed,len_embed, content_len, user_len, config)

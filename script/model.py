@@ -44,7 +44,7 @@ class UnSupervisedGraphSage(nn.Module):
         self.content_len_embed.weight = nn.Parameter(numpy2tensor_int(len_embed), requires_grad=False)
         # https://discuss.pytorch.org/t/can-we-use-pre-trained-word-embeddings-for-weight-initialization-in-nn-embedding/1222
         self.user_embed = nn.Embedding(user_size, word_embed.shape[1])# 需要初始化, 然后是能够训练
-        init.xavier_uniform(self.user_embed.weight)
+        init.xavier_uniform_(self.user_embed.weight)
         self.user_embed.weight = nn.Parameter(self.user_embed.weight)
 
 
@@ -153,7 +153,6 @@ class UnSupervisedGraphSage(nn.Module):
             print(batch_id)
         word_length = self.content_len_embed(batch_id)
         word_length = word_length.view(-1)
-        word_index_list = numpy2tensor_long(word_index_list)
         word_vector_list = self.word_embed(word_index_list)
 
         #padding-sort
@@ -229,6 +228,7 @@ class UnSupervisedGraphSage(nn.Module):
         output_user = self._aggregate(sample_dic2,"user", num_samples)
         return (ouput_question, output_user)
 
+    #input tensors
     def loss(self, question_node_id, user_node_id, answer_edge_id):
         # tim1 = time.time()
         question_node_vec, user_node_vec = self.forward(question_node_id, user_node_id)

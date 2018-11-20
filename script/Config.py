@@ -1,5 +1,5 @@
 class config:
-    batch_size = 10
+    batch_size = 15
     lstm_input_size = 300
     lstm_hidden_size = 300
     neg_sample_size = 10
