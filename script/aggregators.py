@@ -59,7 +59,7 @@ class PoolAggregator(nn.Module):
     """
 
     def __init__(self, input_dims,
-                 output_dim, pool='mean', bias=True):
+                 output_dim, pool='mean', act='relu', bias=True):
         """
         Initializes the aggregator f or a specific graph.
 d
@@ -74,6 +74,7 @@ d
         self.pool = pool
         self.linear = nn.Linear(2 * input_dims, output_dim, bias)
         self.bn = nn.BatchNorm1d(self.output_dim)
+        self.act = act
 
     # 直接进行加法就完事
 
@@ -82,7 +83,7 @@ d
         drop_out = nn.Dropout(p=drop_pro)
         neigh_vecs = drop_out(neigh_vecs)
         support_size = neigh_vecs.size()[1]
-        neigh_vecs = neigh_vecs.transpose(1,2).contiugous()
+        neigh_vecs = neigh_vecs.transpose(1,2).contiguous()
         if(self.pool == 'mean'):
             neigh_vecs = F.avg_pool1d(neigh_vecs,support_size)
         else:

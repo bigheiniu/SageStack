@@ -1,5 +1,5 @@
 class config:
-    batch_size = 15
+    batch_size = 20
     lstm_input_size = 300
     lstm_hidden_size = 300
     neg_sample_size = 10
@@ -27,5 +27,5 @@ class config:
     EDGE_REMOVE_PRO = 0.1
     MAX_SEQUENCE_LENGTH = 30
 
-    debug= False
+    debug= True
     on_gpu = True

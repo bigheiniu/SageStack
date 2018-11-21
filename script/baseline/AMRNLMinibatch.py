@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from  script.Util import numpy2tensor_long, numpy2tensor_float
+from script.Util import numpy2tensor_long, numpy2tensor_float
 from sklearn.model_selection import train_test_split
 
 class Minibatch(object):
@@ -12,9 +12,12 @@ class Minibatch(object):
         :param data: quesiton-answer-user-vote
         :param content_size: length of content
         '''
-        self.quesiton_group = data.groupby("QuestionId")
-        self.question_id = self.quesiton_group.groups
-        self.train_ques, self.test_queis = train_test_split(self.question_id, test_size=0.33, random_state=42)
+        self.quesiton_group = data.groupby("q_id")
+        self.question_id = list(self.quesiton_group.groups.keys())
+        try:
+            self.train_ques, self.test_queis = train_test_split(self.question_id, test_size=0.4, random_state=42)
+        except:
+            print(self.question_id)
         self.config = config
         self.content_size = content_size
         self.batchnum = 0
@@ -41,7 +44,7 @@ class Minibatch(object):
         user_id_list = sorted_m['u_id'].values - self.content_size
         answer_vote_list = sorted_m['score'].values
         # padding to have the same length
-        return numpy2tensor_long(question_id), numpy2tensor_long(user_id_list), \
+        return numpy2tensor_long(question_id).unsqueeze(0), numpy2tensor_long(user_id_list), \
                numpy2tensor_long(answer_id_list),\
                numpy2tensor_float(answer_vote_list)
 

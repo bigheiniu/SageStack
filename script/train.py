@@ -92,7 +92,7 @@ if __name__ == '__main__':
     config = load_config()
     if(config.store):
         file_dir_list = config.file_dir_list
-        G, content_len, user_len,content= loadData(file_dir_list)
+        G, content_len, user_len,content,_ = loadData(file_dir_list)
         saveLoadData(G=G,c=content_len,u=user_len)
     else:
         G, content_len, user_len, content = loadSaveData()

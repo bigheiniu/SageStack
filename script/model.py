@@ -1,6 +1,6 @@
 import time
 
-from .aggregators import MeanAggregator
+from .aggregators import MeanAggregator, PoolAggregator
 import torch.nn as nn
 import torch
 from torch.nn import init, LSTM
@@ -34,7 +34,7 @@ class UnSupervisedGraphSage(nn.Module):
         #self.embedd
 
         self.content_embed = nn.Embedding(content_embedd.shape[0], content_embedd.shape[1])
-        self.content_embed.weight = nn.Parameter(numpy2tensor_int(content_embedd),requires_grad = False)
+        self.content_embed.weight = nn.Parameter(numpy2tensor_long(content_embedd),requires_grad = False)
 
 
         self.word_embed = nn.Embedding(word_embed.shape[0], word_embed.shape[1])
@@ -75,10 +75,9 @@ class UnSupervisedGraphSage(nn.Module):
         for layer in range(2):
                 # aggregator at current layer
             if layer == 0:
-                aggregator = MeanAggregator(
+                aggregator = PoolAggregator(
                     self.dims[layer+1],
-                    output_dim=self.config.dim_1,
-                    act='relu'
+                    output_dim=self.config.dim_1
                 )
                 if self.config.on_gpu:
                     aggregator.cuda()
@@ -86,7 +85,7 @@ class UnSupervisedGraphSage(nn.Module):
                 aggregator = MeanAggregator(
                         self.dims[layer+1],
                         output_dim=self.config.dim_1,
-                        act='none'
+                        act='sigmoid'
                     )
                 if self.config.on_gpu:
                     aggregator.cuda()
@@ -147,10 +146,7 @@ class UnSupervisedGraphSage(nn.Module):
     # lstm 模型融合 + pack
     def _lstm_embedd(self, batch_id, output_size=None):
         batch_id = numpy2tensor_long(batch_id)
-        try:
-            word_index_list = self.content_embed(batch_id)
-        except:
-            print(batch_id)
+        word_index_list = self.content_embed(batch_id)
         word_length = self.content_len_embed(batch_id)
         word_length = word_length.view(-1)
         word_vector_list = self.word_embed(word_index_list)

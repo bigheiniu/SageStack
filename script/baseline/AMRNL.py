@@ -3,11 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import pandas as pd
-from script.Util import numpy2tensor_float, numpy2tensor_long
+from script.Util import numpy2tensor_float, numpy2tensor_long, numpy2tensor_int
 
 class AMRNL(nn.Module):
-    def __init__(self, content, word_embed,
-                 user_size
+    def __init__(self, content, word_embed,len_embed,
+                 user_size,config
                  ):
         '''
 
@@ -15,25 +15,29 @@ class AMRNL(nn.Module):
         :param content: content_data
         '''
         super(AMRNL, self).__init__()
-        self.content_embedding = nn.Embedding(
+        self.content_embed = nn.Embedding(
             content.shape[0],
             content.shape[1]
         )
-        self.content_embedding.weight = nn.Parameter(numpy2tensor_long(content),requires_grad = False)
+        self.config = config
+        self.content_embed.weight = nn.Parameter(numpy2tensor_long(content),requires_grad = False)
 
         self.word_embed = nn.Embedding(word_embed.shape[0], word_embed.shape[1])
         self.word_embed.weight = nn.Parameter(numpy2tensor_float(word_embed), requires_grad=False)
 
+        self.content_len_embed = nn.Embedding(len_embed.shape[0], 1)
+        self.content_len_embed.weight = nn.Parameter(numpy2tensor_int(len_embed), requires_grad=False)
+
         self.user_embdding = nn.Embedding(user_size, word_embed.shape[1])
-        nn.init.xavier_uniform_(self.user_embed.weight)
+        nn.init.xavier_uniform_(self.user_embdding.weight)
+        self.lstm = nn.LSTM(self.config.lstm_input_size, self.config.lstm_hidden_size, batch_first=True,
+                         dropout = self.config.drop_out)
         self.constant = 0.001
 
 
+
     def lstm_embedding(self, batch_id):
-        try:
-            word_index_list = self.content_embed(batch_id)
-        except:
-            print(batch_id)
+        word_index_list = self.content_embed(batch_id)
         word_length = self.content_len_embed(batch_id)
         word_length = word_length.view(-1)
         word_vector_list = self.word_embed(word_index_list)
@@ -73,11 +77,14 @@ class AMRNL(nn.Module):
         loss.sub_(loss[[0]])
         loss.add_(self.constant)
         F.relu(loss, inplace=True)
+        vote_scores = vote_scores.unsqueeze(0)
+        vote_scores = vote_scores.view(-1,1)
         vote_scores_mat = vote_scores.expand_as(user_vec)
-        vote_scores = torch.div(vote_scores_mat, vote_scores.t())
+        vote_scores = torch.div(vote_scores_mat, vote_scores)
 
-        user_loss  = torch.div(torch.matmul(vote_scores, user_vec), 2)
+        user_loss  = torch.div(torch.matmul(vote_scores, user_vec.t()), 2)
         loss = loss + user_loss
+        loss = torch.sum(loss)
         return loss
 
     def evaluate(self, question_id, user_ids, answer_ids, vote_scores):
@@ -89,7 +96,8 @@ class AMRNL(nn.Module):
         loss.sub_(loss[[0]])
         if loss[loss > 0].size()[0] > 1:
             return 0
-        else: return 1
+        else:
+            return 1
 
 
 

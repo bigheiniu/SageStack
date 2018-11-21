@@ -129,7 +129,6 @@ def loadData(file_dir_list):
     quesiton_answer_vote = pd.merge(question_answer, vote, how='left', left_on='Id_y', right_on='PostId')
     quesiton_answer_vote.fillna(0., inplace=True)
     quesiton_answer_vote.drop(['PostId'],inplace=True, axis=1)
-    print(quesiton_answer_vote.head())
     quesiton_answer_vote.columns = ['q_id', 'a_id', 'u_id', 'score']
 
     # dense userId
@@ -151,6 +150,7 @@ def loadData(file_dir_list):
     quesiton_answer_vote['score'] = middle['score_x'] / middle['score_y']
     quesiton_answer_vote.fillna(0.001, inplace=True)
     G = nx.from_pandas_edgelist(quesiton_answer_vote, 'q_id', 'u_id', ['a_id', 'score'])
+    quesiton_answer_vote =  quesiton_answer_vote[['q_id', 'u_id','a_id', 'score']]
     #build bipartite graph
     nodes = G.nodes()
     attr = dict(nodes)
@@ -170,7 +170,7 @@ def loadData(file_dir_list):
         else:
             attr[edge] = False
     nx.set_edge_attributes(G, attr, 'train_removed')
-    return G, content_len, user_len, content
+    return G, content_len, user_len, content, quesiton_answer_vote
 
 def saveLoadData(**kwargs):
     value = list(kwargs.values())
