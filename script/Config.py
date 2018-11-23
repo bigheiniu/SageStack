@@ -10,7 +10,7 @@ class config:
     dim_2 = 300
     edge_sample = 100000
     max_degree = 10
-    resource_base_dir='/home/weiying/yichuan/resource/academia.stackexchange.com/'
+    resource_base_dir='/home/bigheiniu/course/ASU_Course/472/coursePro/472Project/resource/apple/   '
     ordinary_dir_list = [resource_base_dir + 'Posts.xml', resource_base_dir + 'Votes.xml']
     file_dir_list= [resource_base_dir + 'post.pickle',
                 resource_base_dir +'Votes.pickle']
@@ -18,8 +18,9 @@ class config:
 
     #G, content_len, user_len, content
     store=False
+    resource_base_dir="/home/bigheiniu/course/ASU_Course/472/coursePro/472Project/resource/3d/"
     target_dir_list = ['G.pickle','content.pickle','user_len.pickle']
-    target_dir_list = ['/home/weiying/yichuan/resource/academia.stackexchange.com/'+ele for ele in target_dir_list]
+    target_dir_list = ["/home/bigheiniu/course/ASU_Course/472/coursePro/472Project/resource/3d/"+ele for ele in target_dir_list]
     #wordvector feature
     MAX_NB_WORDS = 200000
     EMBEDING_DIM = 300
@@ -28,4 +29,4 @@ class config:
     MAX_SEQUENCE_LENGTH = 30
 
     debug= True
-    on_gpu = True
+    on_gpu = False

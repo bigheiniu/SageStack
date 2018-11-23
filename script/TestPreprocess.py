@@ -58,7 +58,7 @@ def cleanText(text):
     text = re.sub(r"'", " ", text)
     text = re.sub(r"(\d+)(k)", r"\g<1>000", text)
     text = re.sub(r":", " : ", text)
-    text = re.sub(r" e g ", " eg ", text)
+    text = re.sub(r" e g ", " egcontent_list.pickle ", text)
     text = re.sub(r" b g ", " bg ", text)
     text = re.sub(r" u s ", " american ", text)
     text = re.sub(r"\0s", "0", text)

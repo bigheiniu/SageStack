@@ -70,7 +70,7 @@ def load_embedding(content):
     # answerContentEmbed = pad_sequences(answerContentId, maxlen=MAX_SEQUENCE_LENGTH)
     nb_words = min(MAX_NB_WORDS, len(word_index)) + 1
     th = np.max(list(word_index.values()))
-    word_embed = np.zeros((nb_words, EMBEDING_DIM))
+    word_embed = np.random.randn(nb_words, EMBEDING_DIM)
 
 
     #load word2vector vector

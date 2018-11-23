@@ -49,11 +49,11 @@ class Minibatch(object):
                numpy2tensor_float(answer_vote_list)
 
     def evaluate_next_minibatch(self):
-        if (self.testbachnum > len(self.test_queis)):
+        if (self.testbachnum >= len(self.test_queis)):
             self.testbachnum = 0
         start_idx = self.testbachnum
         self.testbachnum+= 1
-        question_id = self.question_id[start_idx]
+        question_id = self.test_queis[start_idx]
         return self.creat_dict(question_id)
 
 
